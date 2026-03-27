@@ -1,0 +1,4 @@
+﻿src/components/PulseLineChart.tsx(34,24): error TS2339: Property 'activePayload' does not exist on type 'MouseHandlerDataParam'.
+src/components/PulseLineChart.tsx(34,43): error TS2339: Property 'activePayload' does not exist on type 'MouseHandlerDataParam'.
+src/components/PulseLineChart.tsx(35,30): error TS2339: Property 'activePayload' does not exist on type 'MouseHandlerDataParam'.
+src/utils/parser.ts(1,8): error TS1192: Module '"C:/Users/natha/Documents/Projects/scriptbeat/node_modules/pdf-parse/dist/pdf-parse/esm/index"' has no default export.

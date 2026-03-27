@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { extractTextFromPDF, parseScriptToScenes, ParsedScene } from "@/utils/parser";
+import { getAnalysisPrompt } from "@/utils/prompts";
 import Groq from "groq-sdk";
 
 export const runtime = 'nodejs';
@@ -9,12 +10,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-const MAX_WORD_COUNT = 3000;
-
-interface SceneBatch {
-  scenes: ParsedScene[];
-  totalWords: number;
-}
+const MAX_WORD_COUNT = 1200;
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,22 +34,7 @@ export async function POST(req: NextRequest) {
 
     const allScenes = parseScriptToScenes(rawText);
 
-    // Group scenes into batches
-    const batches: SceneBatch[] = [];
-    let currentBatch: SceneBatch = { scenes: [], totalWords: 0 };
-
-    for (const scene of allScenes) {
-      if (currentBatch.totalWords + scene.word_count > MAX_WORD_COUNT && currentBatch.scenes.length > 0) {
-        batches.push(currentBatch);
-        currentBatch = { scenes: [], totalWords: 0 };
-      }
-      currentBatch.scenes.push(scene);
-      currentBatch.totalWords += scene.word_count;
-    }
-    if (currentBatch.scenes.length > 0) {
-      batches.push(currentBatch);
-    }
-
+    // Process scenes in batches
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
@@ -65,49 +46,110 @@ export async function POST(req: NextRequest) {
     // Process asynchronously and stream results
     (async () => {
       try {
-        sendEvent({ type: "init", totalScenes: allScenes.length, totalBatches: batches.length }, "init");
+        const MAX_TOKENS_PER_BATCH = 5500;
+        const batches: ParsedScene[][] = [];
+        let currentBatch: ParsedScene[] = [];
+        let currentTokens = 0;
+
+        for (const s of allScenes) {
+          const estimatedTokens = Math.ceil(s.word_count * 1.3) + 100;
+          if (currentBatch.length > 0 && currentTokens + estimatedTokens > MAX_TOKENS_PER_BATCH) {
+            batches.push(currentBatch);
+            currentBatch = [s];
+            currentTokens = estimatedTokens;
+          } else {
+            currentBatch.push(s);
+            currentTokens += estimatedTokens;
+          }
+        }
+        if (currentBatch.length > 0) batches.push(currentBatch);
+
+        sendEvent({ totalScenes: allScenes.length, totalBatches: batches.length }, "init");
+
+        let previousTensionScore = 0;
 
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
-          const sceneContext = batch.scenes.map(
-            (s) => `[SCENE ${s.scene_number}]\nWORDS: ${s.word_count}\nTEXT:\n${s.text}\n---\n`
-          ).join("\n");
+          const scenesContext = batch.map(s => `[SCENE ${s.scene_number}]\nWORDS: ${s.word_count}\nTEXT:\n${s.text}\n---\n`).join('');
 
-          const prompt = `You are a script pacing analyzer. Analyze the following screenplay scenes. 
-For EACH scene, calculate a tension score (0 to 100), identify the primary dominant emotion (choose one from: Fear, Suspense, Sadness, Anger, Calm, Joy, Surprise, Anticipation), summarize the scene (max 2 sentences), provide a brief dialogue snippet (if any dialogue exists), identify the key narrative elements (e.g., Conflict, Action, Pacing: High, etc. max 3 short tags), and the overall sentiment (Positive, Negative, Neutral).
+          const prompt = getAnalysisPrompt(scenesContext);
 
-Respond ONLY with a JSON array mapping to the scenes provided.
-Schema example:
-[
-  {
-    "scene_number": 1,
-    "tension_score": 85,
-    "primary_emotion": "Suspense",
-    "summary": "...",
-    "dialogue_snippet": "Character: 'Line'",
-    "elements": ["Conflict", "Pacing: High"],
-    "sentiment": "Negative"
-  }
-]
+          console.log("Prompt:", prompt);
 
-Scenes to analyze:
-${sceneContext}`;
+          let success = false;
+          let retries = 3;
+          let delay = 3500;
+          let parsedResults: any[] = [];
 
-          const completion = await groq.chat.completions.create({
-            messages: [{ role: "user", content: prompt }],
-            model: "llama-3.1-8b-instant",
-            response_format: { type: "json_object" }, // Wait, array is not always directly returned. Better to prompt for an object {"results": [...]}
-            temperature: 0.1,
+          while (!success && retries > 0) {
+            try {
+              const completion = await groq.chat.completions.create({
+                messages: [{ role: "user", content: prompt }],
+                model: "llama-3.1-8b-instant",
+                response_format: { type: "json_object" },
+                temperature: 0.1,
+              });
+
+              const content = completion.choices[0]?.message?.content;
+              if (content) {
+                const parsed = JSON.parse(content);
+                if (parsed && Array.isArray(parsed.results)) {
+                  parsedResults = parsed.results;
+                  success = true;
+                  console.log("Parsed Results:", JSON.stringify(parsedResults));
+                }
+              }
+
+            } catch (err: any) {
+              if (err.status === 429 || err.status === 413) {
+                // Rate limit or payload too large
+                await new Promise(r => setTimeout(r, delay));
+                delay += 3000;
+              } else if (err.code === "json_validate_failed" || err instanceof SyntaxError) {
+                // JSON parse failed on groq's end (e.g. invalid string escape)
+              } else {
+                console.error("Unknown groq error loop:", err);
+              }
+              retries--;
+            }
+          }
+
+          // Data Validation & Fallback for missing scenes in the batch
+          const finalBatchData = batch.map(s => {
+            let sceneData = parsedResults.find((r: any) => r.scene_number === s.scene_number);
+
+            if (!sceneData || typeof sceneData.tension_score !== 'number') {
+              sceneData = {
+                scene_number: s.scene_number,
+                tension_score: 0,
+                primary_emotion: "Calm",
+                summary: "Analysis failed due to content length or rate limit constraints.",
+                score_justification: "Analysis failed.",
+                sentiment: "Neutral"
+              };
+            }
+
+            // Tension Smoothing
+            const modelScore = sceneData.tension_score;
+            const smoothedTension = Math.min(100, Math.round((0.5 * previousTensionScore) + modelScore));
+            previousTensionScore = smoothedTension;
+
+            return {
+              ...sceneData,
+              scene_number: s.scene_number,
+              tension_score: smoothedTension
+            };
           });
 
-          // Groq JSON object mode requires the prompt to specify JSON and return an object.
-          // Let me revise the prompt to ask for {"results": [...]}
+          sendEvent({ batch: i + 1, data: finalBatchData }, "batch");
+          // Mandatory small delay per request to stay under 6000 TPM
+          await new Promise(r => setTimeout(r, 1200));
         }
       } catch (err) {
-        console.error("Batch processing error:", err);
+        console.error("Scene processing error:", err);
         sendEvent({ error: String(err) }, "error");
       } finally {
-        sendEvent({ type: "done" }, "done");
+        sendEvent({ done: true }, "done");
         writer.close();
       }
     })();

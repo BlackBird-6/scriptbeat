@@ -1,0 +1,162 @@
+﻿npm : Error: Cannot apply 
+unknown utility class 
+`border-border`. Are you 
+using CSS modules or 
+similar and missing 
+`@reference`? https://tailw
+indcss.com/docs/functions-a
+nd-directives#reference-dir
+ective
+At line:1 char:66
++ ... ilentlyContinue; npm 
+run build > 
+build_success.log 2> 
+build_error.log
++                      ~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Err  
+  or: Cannot a...rence-d   
+ irective:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+    [2m[at 
+onInvalidCandidate (C:\User
+s\natha\Documents\Projects\
+scriptbeat\node_modules\tai
+lwindcss\dist\lib.js:21:131
+4)][0m
+    [2m[at Ee (C:\Users\na
+tha\Documents\Projects\scri
+ptbeat\node_modules\tailwin
+dcss\dist\lib.js:16:37066)]
+[0m
+    [2m[at C:\Users\natha\
+Documents\Projects\scriptbe
+at\node_modules\tailwindcss
+\dist\lib.js:21:355][0m
+    [2m[at _r (C:\Users\na
+tha\Documents\Projects\scri
+ptbeat\node_modules\tailwin
+dcss\dist\lib.js:3:1733)][
+0m
+    [2m[at I (C:\Users\nat
+ha\Documents\Projects\scrip
+tbeat\node_modules\tailwind
+css\dist\lib.js:3:1377)][0
+m
+    [2m[at Te (C:\Users\na
+tha\Documents\Projects\scri
+ptbeat\node_modules\tailwin
+dcss\dist\lib.js:21:172)][
+0m
+    [2m[at mn (C:\Users\na
+tha\Documents\Projects\scri
+ptbeat\node_modules\tailwin
+dcss\dist\lib.js:38:294)][
+0m
+    [2m[at process.process
+TicksAndRejections (node:in
+ternal/process/task_queues:
+95:5)][0m
+    [2m[at async gn (C:\Us
+ers\natha\Documents\Project
+s\scriptbeat\node_modules\t
+ailwindcss\dist\lib.js:38:6
+31)][0m
+    [2m[at async Xr (C:\Us
+ers\natha\Documents\Project
+s\scriptbeat\node_modules\@
+tailwindcss\node\dist\index
+.js:10:3416)][0m
+
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./src/app/globals.css
+Error evaluating Node.js 
+code
+CssSyntaxError: 
+tailwindcss: C:\Users\natha
+\Documents\Projects\scriptb
+eat\src\app\globals.css:1:1
+: Cannot apply unknown 
+utility class 
+`border-border`. Are you 
+using CSS modules or 
+similar and missing 
+`@reference`? https://tailw
+indcss.com/docs/functions-a
+nd-directives#reference-dir
+ective
+    at Input.error (node_mo
+dules/postcss/lib/input.js:
+135:16) [C:\Users\natha\Doc
+uments\Projects\scriptbeat\
+.next\build\chunks\node_mod
+ules_13sb.px._.js:4651:22]
+    at error (node_modules/
+postcss/lib/node.js:146:32)
+ [C:\Users\natha\Documents\
+Projects\scriptbeat\.next\b
+uild\chunks\node_modules_13
+sb.px._.js:928:38]
+    [at Object.Once (C:\Use
+rs\natha\Documents\Projects
+\scriptbeat\node_modules\@t
+ailwindcss\postcss\dist\ind
+ex.js:10:6913)]
+    [at process.processTick
+sAndRejections (node:intern
+al/process/task_queues:95:5
+)]
+    at async 
+LazyResult.runAsync (node_m
+odules/postcss/lib/lazy-res
+ult.js:293:11) [C:\Users\na
+tha\Documents\Projects\scri
+ptbeat\.next\build\chunks\n
+ode_modules_13sb.px._.js:62
+14:21]
+    at async transform (tur
+bopack:///[turbopack-node]/
+transforms/postcss.ts:70:34
+) [C:\Users\natha\Documents
+\Projects\scriptbeat\.next\
+build\chunks\[root-of-the-s
+erver]__0d-m0h0._.js:146:36
+]
+    at async run (turbopack
+:///[turbopack-node]/child_
+process/evaluate.ts:89:23) 
+[C:\Users\natha\Documents\P
+rojects\scriptbeat\.next\bu
+ild\chunks\[root-of-the-ser
+ver]__0ubbtyl._.js:443:31]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css 
+[Client Component Browser]
+    ./src/app/layout.tsx 
+[Server Component]
+
+
+    at async transform (tur
+bopack:///[turbopack-node]/
+transforms/postcss.ts:70:34
+) [C:\Users\natha\Documents
+\Projects\scriptbeat\.next\
+build\chunks\[root-of-the-s
+erver]__0d-m0h0._.js:146:36
+])
+    at async run (turbopack
+:///[turbopack-node]/child_
+process/evaluate.ts:89:23) 
+[C:\Users\natha\Documents\P
+rojects\scriptbeat\.next\bu
+ild\chunks\[root-of-the-ser
+ver]__0ubbtyl._.js:443:31])
