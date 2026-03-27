@@ -1,3 +1,11 @@
+// Vercel Serverless / Node.js polyfills for pdf.js dependencies
+if (typeof global.DOMMatrix === 'undefined') {
+  (global as any).DOMMatrix = class DOMMatrix {};
+}
+if (typeof global.Path2D === 'undefined') {
+  (global as any).Path2D = class Path2D {};
+}
+
 const { PDFParse } = require("pdf-parse");
 
 export interface ParsedScene {

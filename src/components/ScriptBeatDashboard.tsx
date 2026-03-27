@@ -181,16 +181,10 @@ export function ScriptBeatDashboard() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => loadExample('/examples/Bee_Movie.pdf', 'Bee_Movie.pdf')}
+                onClick={() => loadExample('/examples/Macbeth.pdf', 'Macbeth.pdf')}
                 className="bg-[#222] hover:bg-[#333] text-gray-300 border border-[#444] text-[12px] font-medium h-[32px] rounded-[6px] px-3 transition-colors shrink-0"
               >
-                Bee Movie (Warning: BIG FILE)
-              </button>
-              <button
-                onClick={() => loadExample("/examples/Fogg's%20Millions.pdf", "Fogg's Millions.pdf")}
-                className="bg-[#222] hover:bg-[#333] text-gray-300 border border-[#444] text-[12px] font-medium h-[32px] rounded-[6px] px-3 transition-colors shrink-0"
-              >
-                Fogg's Millions
+                Macbeth (Warning: BIG FILE)
               </button>
               <button
                 onClick={() => loadExample("/examples/Monsters%20are%20Due%20on%20Maple%20Street.pdf", "Monsters are Due on Maple Street.pdf")}
