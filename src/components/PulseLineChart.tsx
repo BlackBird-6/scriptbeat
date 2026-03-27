@@ -15,13 +15,25 @@ interface PulseLineChartProps {
   data: SceneData[];
   onSceneClick: (scene: SceneData) => void;
   activeSceneNumber: number | null;
+  smoothness: number;
 }
 
-export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseLineChartProps) {
-  const processedData = data.map((d) => ({
-    ...d,
-    durationLabel: `${(d.scene_number)}`
-  }));
+export function PulseLineChart({ data, onSceneClick, activeSceneNumber, smoothness }: PulseLineChartProps) {
+  let prevTension = 0;
+  const processedData = data.map((d, index) => {
+    const rawScore = d.tension_score;
+    let smoothedTension = rawScore;
+    if (index > 0) {
+      smoothedTension = Math.min(100, Math.max(0, Math.round((smoothness * prevTension) + ((1 - smoothness) * rawScore))));
+    }
+    prevTension = smoothedTension;
+
+    return {
+      ...d,
+      smoothed_tension: smoothedTension,
+      durationLabel: `${(d.scene_number)}`
+    };
+  });
 
   return (
     <div className="w-full h-full relative z-10">
@@ -79,7 +91,7 @@ export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseL
             />
             <Area
               type="monotone"
-              dataKey="tension_score"
+              dataKey="smoothed_tension"
               stroke="url(#colorGradient)"
               fill="url(#fillGradient)"
               strokeWidth={3}
@@ -103,7 +115,7 @@ export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseL
                 />
                 <ReferenceDot
                   x={processedData.find(d => d.scene_number === activeSceneNumber)?.durationLabel}
-                  y={processedData.find(d => d.scene_number === activeSceneNumber)?.tension_score}
+                  y={processedData.find(d => d.scene_number === activeSceneNumber)?.smoothed_tension}
                   r={5}
                   fill="#fff"
                   stroke="#ec4899"

@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
               previousTensionScore = smoothedTension;
               return {
                 scene_number: globalSceneCounter++,
-                tension_score: modelScore,
+                tension_score: previousTensionScore,
                 primary_emotion: "Calm",
                 summary: "Analysis failed due to rate limit constraints.",
                 score_justification: "Analysis failed.",
