@@ -15,30 +15,32 @@ Rate the intrinsic plot tension based on the following linear anchors:
 81-100 (Climax/Peak Tension): The "Point of No Return." Life-or-death stakes or the final resolution of a major conflict. (e.g., The final standoff or a catastrophic discovery).
 
 Analysis Instructions
-For each scene provided:
+For EACH scene provided:
 
 Assign a Tension Score: Based on the scale above.
 
 Select Primary Emotion: Choose ONLY from [Fear, Suspense, Sadness, Anger, Calm, Joy, Surprise, Anticipation].
 
-Summarize: Max 2 sentences covering the plot movement.
+Summarize: Max 2 sentences covering the plot movement. Include the current location.
 
 Justify the Score: Write 2-3 sentences explaining why the score was chosen. You MUST quote specific dialogue or action lines from the screenplay to support the score.
 
 Sentiment: Rate as Positive, Negative, or Neutral.
 
+Ensure that EVERY scene in the input is accounted for in the output.
+
 Output Format
 Respond strictly in JSON using this schema:
 {
 "results": [
-{
-"scene_number": <number>,
-"tension_score": <number>,
-"primary_emotion": "<string>",
-"summary": "<string>",
-"score_justification": "<string>",
-"sentiment": "<string>"
-}
+  {
+  "scene_number": <number>,
+  "tension_score": <number>,
+  "primary_emotion": "<string>",
+  "summary": "<string>",
+  "score_justification": "<string>",
+  "sentiment": "<string>"
+  }
 ]
 }
 

@@ -27,7 +27,7 @@ export function SceneSidebar({ scene }: { scene: SceneData | null }) {
         <h2 className="text-xl font-bold text-gray-100 mb-4">Scene {scene.scene_number}</h2>
 
         <div className="mb-6 flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-gray-400">Intensity Score:</span>
+          <span className="text-sm font-semibold text-gray-400">Raw Intensity Score:</span>
           <span className={`text-sm font-semibold ${isHighTension ? 'text-[#ef4444]' : 'text-[#f59e0b]'}`}>
             {scene.tension_score} {isHighTension && "(High)"}
           </span>

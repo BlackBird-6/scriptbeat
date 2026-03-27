@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Process asynchronously and stream results
     (async () => {
       try {
-        const MAX_TOKENS_PER_BATCH = 5500;
+        const MAX_TOKENS_PER_BATCH = 2500;
         const batches: ParsedScene[][] = [];
         let currentBatch: ParsedScene[] = [];
         let currentTokens = 0;
@@ -67,14 +67,13 @@ export async function POST(req: NextRequest) {
         sendEvent({ totalScenes: allScenes.length, totalBatches: batches.length }, "init");
 
         let previousTensionScore = 0;
+        let globalSceneCounter = 1;
 
         for (let i = 0; i < batches.length; i++) {
           const batch = batches[i];
           const scenesContext = batch.map(s => `[SCENE ${s.scene_number}]\nWORDS: ${s.word_count}\nTEXT:\n${s.text}\n---\n`).join('');
 
           const prompt = getAnalysisPrompt(scenesContext);
-
-          console.log("Prompt:", prompt);
 
           let success = false;
           let retries = 3;
@@ -114,32 +113,37 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // Data Validation & Fallback for missing scenes in the batch
-          const finalBatchData = batch.map(s => {
-            let sceneData = parsedResults.find((r: any) => r.scene_number === s.scene_number);
+          let finalBatchData: any[] = [];
+          if (parsedResults.length > 0) {
+            finalBatchData = parsedResults.map((r: any) => {
+              const modelScore = typeof r.tension_score === 'number' ? r.tension_score : 0;
+              const smoothedTension = Math.min(100, Math.round((0.5 * previousTensionScore) + 0.5 * modelScore));
+              previousTensionScore = smoothedTension;
 
-            if (!sceneData || typeof sceneData.tension_score !== 'number') {
-              sceneData = {
-                scene_number: s.scene_number,
-                tension_score: 0,
+              return {
+                scene_number: globalSceneCounter++,
+                tension_score: modelScore,
+                primary_emotion: r.primary_emotion || "Calm",
+                summary: r.summary || "",
+                score_justification: r.score_justification || "",
+                sentiment: r.sentiment || "Neutral"
+              };
+            });
+          } else {
+            // Fallback for missing scenes if the entire batch failed
+            finalBatchData = batch.map(s => {
+              const smoothedTension = Math.min(100, Math.round(0.5 * previousTensionScore));
+              previousTensionScore = smoothedTension;
+              return {
+                scene_number: globalSceneCounter++,
+                tension_score: modelScore,
                 primary_emotion: "Calm",
-                summary: "Analysis failed due to content length or rate limit constraints.",
+                summary: "Analysis failed due to rate limit constraints.",
                 score_justification: "Analysis failed.",
                 sentiment: "Neutral"
               };
-            }
-
-            // Tension Smoothing
-            const modelScore = sceneData.tension_score;
-            const smoothedTension = Math.min(100, Math.round((0.5 * previousTensionScore) + modelScore));
-            previousTensionScore = smoothedTension;
-
-            return {
-              ...sceneData,
-              scene_number: s.scene_number,
-              tension_score: smoothedTension
-            };
-          });
+            });
+          }
 
           sendEvent({ batch: i + 1, data: finalBatchData }, "batch");
           // Mandatory small delay per request to stay under 6000 TPM

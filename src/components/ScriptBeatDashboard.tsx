@@ -47,7 +47,7 @@ export function ScriptBeatDashboard() {
       const decoder = new TextDecoder();
       let buffer = "";
 
-      let totalExpectedScenes = 100;
+      let totalExpectedScenes = 0;
 
       while (true) {
         const { value, done } = await reader.read();

@@ -14,7 +14,7 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
 }
 
 export function parseScriptToScenes(text: string): ParsedScene[] {
-  const sceneHeadingRegex = /^\s*(?:[0-9]{1,3}[A-Z]?\s+)?(?:INT\.|EXT\.|INT\/EXT\.|I\/E\.|INT\s|EXT\s).*$/gm;
+  const sceneHeadingRegex = /^\s*(?:\[?[0-9]{1,3}[A-Z]?(?:\.)?\]?\s+)?(?:INT\.|EXT\.|INT\/EXT\.|I\/E\.|INT\s|EXT\s).*$/gim;
 
   const rawScenes: ParsedScene[] = [];
   let match;

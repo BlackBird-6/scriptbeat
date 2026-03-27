@@ -20,7 +20,7 @@ interface PulseLineChartProps {
 export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseLineChartProps) {
   const processedData = data.map((d) => ({
     ...d,
-    durationLabel: `${(d.scene_number * 3)}min`
+    durationLabel: `${(d.scene_number)}`
   }));
 
   return (
@@ -44,26 +44,26 @@ export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseL
                 <stop offset="100%" stopColor="#10b981" />
               </linearGradient>
               <linearGradient id="fillGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15}/>
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0}/>
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2e" vertical={true} horizontal={true} />
-            <XAxis 
-              dataKey="durationLabel" 
-              tick={{ fill: "#666", fontSize: 11 }} 
-              axisLine={{ stroke: "#2a2a2e" }} 
-              tickLine={false} 
+            <XAxis
+              dataKey="durationLabel"
+              tick={{ fill: "#666", fontSize: 11 }}
+              axisLine={{ stroke: "#2a2a2e" }}
+              tickLine={false}
               interval="preserveStartEnd"
               minTickGap={30}
             />
-            <YAxis 
-              domain={[0, 100]} 
-              tick={{ fill: "#666", fontSize: 11 }} 
-              axisLine={false} 
-              tickLine={false} 
+            <YAxis
+              domain={[0, 100]}
+              tick={{ fill: "#666", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
             />
-            <Tooltip 
+            <Tooltip
               cursor={{ stroke: '#666', strokeWidth: 1, strokeDasharray: '3 3' }}
               content={({ active, payload, label }: any) => {
                 if (active && payload && payload.length) {
@@ -77,14 +77,14 @@ export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseL
                 return null;
               }}
             />
-            <Area 
-              type="monotone" 
-              dataKey="tension_score" 
-              stroke="url(#colorGradient)" 
+            <Area
+              type="monotone"
+              dataKey="tension_score"
+              stroke="url(#colorGradient)"
               fill="url(#fillGradient)"
               strokeWidth={3}
               dot={false}
-              activeDot={{ 
+              activeDot={{
                 r: 6, fill: "#fff", stroke: "#ef4444", strokeWidth: 2,
                 onClick: (_: any, payload: any) => {
                   if (payload && payload.payload) {
@@ -95,19 +95,19 @@ export function PulseLineChart({ data, onSceneClick, activeSceneNumber }: PulseL
             />
             {activeSceneNumber !== null && processedData.find(d => d.scene_number === activeSceneNumber) && (
               <>
-                <ReferenceLine 
-                  x={processedData.find(d => d.scene_number === activeSceneNumber)?.durationLabel} 
-                  stroke="#555" 
-                  strokeDasharray="3 3" 
+                <ReferenceLine
+                  x={processedData.find(d => d.scene_number === activeSceneNumber)?.durationLabel}
+                  stroke="#555"
+                  strokeDasharray="3 3"
                   style={{ pointerEvents: 'none' }}
                 />
-                <ReferenceDot 
-                  x={processedData.find(d => d.scene_number === activeSceneNumber)?.durationLabel} 
-                  y={processedData.find(d => d.scene_number === activeSceneNumber)?.tension_score} 
-                  r={5} 
-                  fill="#fff" 
-                  stroke="#ec4899" 
-                  strokeWidth={2} 
+                <ReferenceDot
+                  x={processedData.find(d => d.scene_number === activeSceneNumber)?.durationLabel}
+                  y={processedData.find(d => d.scene_number === activeSceneNumber)?.tension_score}
+                  r={5}
+                  fill="#fff"
+                  stroke="#ec4899"
+                  strokeWidth={2}
                   style={{ pointerEvents: 'none' }}
                 />
               </>

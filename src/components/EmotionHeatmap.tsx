@@ -33,10 +33,10 @@ export function EmotionHeatmap({ data, activeSceneNumber, onSceneClick }: { data
           );
         })}
       </div>
-      
+
       {/* Legend */}
       <div className="flex justify-start mt-4 text-[12px] text-gray-400 gap-6 border-t border-[#2a2a2e] pt-4">
-        {Object.keys(EmotionColors).slice(0, 5).map(emotion => (
+        {Object.keys(EmotionColors).map(emotion => (
           <div key={emotion} className="flex items-center gap-2">
             <span className={`w-3 h-3 rounded-[2px] ${EmotionColors[emotion]}`} />
             <span className="font-medium text-gray-300">{emotion}</span>
